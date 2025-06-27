@@ -20,6 +20,6 @@ let package = Package(
                 .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release)),
             ]
         ),
-        .testTarget(name: "Tests", dependencies: ["HummingBirdCounterApp"])
+        .testTarget(name: "Tests", dependencies: ["HummingBirdCounterApp", .product(name: "HummingbirdTesting", package: "hummingbird"),])
     ]
 )
