@@ -2,10 +2,9 @@
 
 
 import Hummingbird
-import HummingBirdCounterApp
 
-enum AppComposer {
-    static func execute(with configuration: ApplicationConfiguration, store: CounterStore) -> some ApplicationProtocol {
+public enum AppComposer {
+    public static func execute(with configuration: ApplicationConfiguration, store: CounterStore) -> some ApplicationProtocol {
         let router = Router()
         let counterController = CounterController(store: store) |> CounterControllerAdapter.init
         router.get("/counter", use: counterController.get)
