@@ -2,16 +2,71 @@
 import XCTest
 
 class CounterControllerTests: XCTestCase {
-    class CounterStoreSpy {
-        var capturedMessages = [Any]()
+    
+    protocol CounterStore {
+        func load() async throws -> Int
+    }
+    
+    class CounterStoreSpy: CounterStore {
+        var capturedMessages = [Message]()
+        
+        enum Message {
+            case load
+        }
+        
+        func load() async throws -> Int {
+            capturedMessages.append(.load)
+            return 0
+        }
     }
     struct CounterController {
-        let store: CounterStoreSpy
+        let store: CounterStore
+        
+        func get() async throws -> Int {
+            try await store.load()
+        }
     }
+    
     
     func test_init_doesntMessageStore() {
         let storeSpy = CounterStoreSpy()
         let _ = CounterController(store: storeSpy)
         XCTAssertTrue(storeSpy.capturedMessages.isEmpty)
+    }
+    
+    func test_get_deliversErrorOnStoreError() async throws {
+        struct CounterStoreStub: CounterStore {
+            let error: NSError
+            func load() async throws -> Int {
+                throw error
+            }
+        }
+        let storeStub = CounterStoreStub(error: anyError())
+        let sut = CounterController(store: storeStub)
+        
+        await XCTAssertThrowsErrorAsync(try await sut.get()) { error in
+            XCTAssertEqual(error as NSError, anyError())
+        }
+    }
+    
+    func anyError() -> NSError {
+        NSError(domain: "any error", code: 0)
+    }
+}
+
+import XCTest
+
+func XCTAssertThrowsErrorAsync<T>(
+    _ expression: @autoclosure () async throws -> T,
+    _ message: @autoclosure () -> String = "",
+    file: StaticString = #filePath,
+    line: UInt = #line,
+    _ errorHandler: (_ error: Error) -> Void = { _ in }
+) async {
+    do {
+        _ = try await expression()
+        XCTFail("Expected error to be thrown, but no error was thrown. \(message())", file: file, line: line)
+    } catch {
+        errorHandler(error)
     }
 }
