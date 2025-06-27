@@ -17,6 +17,11 @@ struct CounterControllerAdapter: @unchecked Sendable {
         let body = try await controller.postIncrease()
         return try ResponseGeneratorEncoder.execute(body, from: request, context: context)
     }
+    
+    @Sendable func postDecrease(request: Request, context: BasicRequestContext) async throws -> Response {
+        let body = try await controller.postDecrease()
+        return try ResponseGeneratorEncoder.execute(body, from: request, context: context)
+    }
 }
 
 enum ResponseGeneratorEncoder {
@@ -43,6 +48,7 @@ enum AppComposer {
         let counterController = CounterController(store: store) |> CounterControllerAdapter.init
         router.get("/counter", use: counterController.get)
         router.post("/increase", use: counterController.postIncrease)
+        router.post("/decrease", use: counterController.postDecrease)
         return Application(router: router, configuration: configuration)
     }
 }
@@ -101,6 +107,17 @@ class IntegrationTests: XCTestCase {
             let renderedCount1 = buffer.readString(length: buffer.readableBytes)
             XCTAssertEqual(renderedCount1, "<span>1</span>")
             
+            
+            let response2 = try await client.executeRequest(
+                uri: "/decrease",
+                method: .post,
+                headers: [:],
+                body: nil
+            )
+            
+            buffer = response2.body
+            let renderedCount2 = buffer.readString(length: buffer.readableBytes)
+            XCTAssertEqual(renderedCount2, "<span>0</span>")
         }
     }
 }
