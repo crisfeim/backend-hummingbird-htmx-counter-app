@@ -6,6 +6,7 @@ class CounterControllerTests: XCTestCase {
     protocol CounterStore {
         func load() async throws -> Int
         func increase() async throws -> Int
+        func decrease() async throws -> Int
     }
     
     class CounterStoreSpy: CounterStore {
@@ -23,6 +24,10 @@ class CounterControllerTests: XCTestCase {
         func increase() async throws -> Int {
             fatalError("dont needed yet")
         }
+        
+        func decrease() async throws -> Int {
+            fatalError("dont needed yet")
+        }
     }
     struct CounterController {
         let store: CounterStore
@@ -33,6 +38,10 @@ class CounterControllerTests: XCTestCase {
         
         func postIncrease() async throws -> Int {
             try await store.increase()
+        }
+        
+        func postDecrease() async throws -> Int {
+            try await store.decrease()
         }
     }
     
@@ -51,6 +60,10 @@ class CounterControllerTests: XCTestCase {
             }
             
             func increase() async throws -> Int {
+                fatalError("shouldn't be invoked in this test")
+            }
+            
+            func decrease() async throws -> Int {
                 fatalError("shouldn't be invoked in this test")
             }
         }
@@ -72,6 +85,10 @@ class CounterControllerTests: XCTestCase {
             func increase() async throws -> Int {
                 throw error
             }
+            
+            func decrease() async throws -> Int {
+                fatalError("shouldn't be invoked in this test")
+            }
         }
         
         let storeStub = CounterStoreStub(error: anyError())
@@ -80,7 +97,30 @@ class CounterControllerTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await sut.postIncrease()) { error in
             XCTAssertEqual(error as NSError, anyError())
         }
+    }
+    
+    func test_postDecrease_deliversErrorOnStoreError() async throws {
+        struct CounterStoreStub: CounterStore {
+            let error: NSError
+            func load() async throws -> Int {
+                fatalError("should not be called")
+            }
         
+            func increase() async throws -> Int {
+                fatalError("shouldn't be invoked in this test")
+            }
+            
+            func decrease() async throws -> Int {
+                throw error
+            }
+        }
+        
+        let storeStub = CounterStoreStub(error: anyError())
+        let sut = CounterController(store: storeStub)
+        
+        await XCTAssertThrowsErrorAsync(try await sut.postDecrease()) { error in
+            XCTAssertEqual(error as NSError, anyError())
+        }
     }
     
     func anyError() -> NSError {
