@@ -9,7 +9,7 @@ struct ButtonView {
         <button
         hx-post="\(postPath)"
         hx-target="\(elementTarget)"
-        hx-swap="outerHTML">
+        hx-swap="innerHTML">
             \(label)
         </button>
         """

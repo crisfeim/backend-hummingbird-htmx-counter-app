@@ -7,7 +7,7 @@ struct CounterLoadingView {
         id="counter"
         hx-get="/counter"
         hx-trigger="load"
-        hx-swap="outerHTML">
+        hx-swap="innerHTML">
             loading....
         </div>
         """
