@@ -17,7 +17,8 @@ public struct CounterController {
         return CounterView(count: count).render()
     }
     
-    public func postDecrease() async throws -> Int {
-        try await store.decrease()
+    public func postDecrease() async throws -> String {
+        let count = try await store.decrease()
+        return CounterView(count: count).render()
     }
 }

@@ -48,6 +48,28 @@ class CounterControllerHappyPathTests: XCTestCase {
         XCTAssertEqual(renderedCount, "<span>10</span>")
     }
     
+    func test_postDecrease_deliversRenderedViewOnStoreSuccesfulRetrieval() async throws {
+        struct CounterStoreStub: CounterStore {
+            let result: Int
+            func load() async throws -> Int {
+                fatalError("shouldn't be invoked in this test")
+            }
+            
+            func increase() async throws -> Int {
+                fatalError("shouldn't be invoked in this test")
+            }
+            
+            func decrease() async throws -> Int {
+                result
+            }
+        }
+        
+        let storeStub = CounterStoreStub(result: 10)
+        let sut = CounterController(store: storeStub)
+        let renderedCount = try await sut.postDecrease()
+        XCTAssertEqual(renderedCount, "<span>10</span>")
+    }
+    
     func anyError() -> NSError {
         NSError(domain: "any error", code: 0)
     }
