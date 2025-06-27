@@ -12,6 +12,11 @@ struct CounterControllerAdapter: @unchecked Sendable {
         let body = try await controller.get()
         return try ResponseGeneratorEncoder.execute(body, from: request, context: context)
     }
+    
+    @Sendable func postIncrease(request: Request, context: BasicRequestContext) async throws -> Response {
+        let body = try await controller.postIncrease()
+        return try ResponseGeneratorEncoder.execute(body, from: request, context: context)
+    }
 }
 
 enum ResponseGeneratorEncoder {
@@ -37,6 +42,7 @@ enum AppComposer {
         let router = Router()
         let counterController = CounterController(store: store) |> CounterControllerAdapter.init
         router.get("/counter", use: counterController.get)
+        router.post("/increase", use: counterController.postIncrease)
         return Application(router: router, configuration: configuration)
     }
 }
@@ -73,16 +79,28 @@ class IntegrationTests: XCTestCase {
     func test() async throws {
         let app = AppComposer.execute(with: .init(), store: InMemoryCounterStore())
         _ = try await app.test(.router) { client in
-            let response = try await client.executeRequest(
+            let response0 = try await client.executeRequest(
                 uri: "/counter",
                 method: .get,
                 headers: [:],
                 body: nil
             )
             
-            var buffer = response.body
-            let renderedCount = buffer.readString(length: buffer.readableBytes)
-            XCTAssertEqual(renderedCount, "<span>0</span>")
+            var buffer = response0.body
+            let renderedCount0 = buffer.readString(length: buffer.readableBytes)
+            XCTAssertEqual(renderedCount0, "<span>0</span>")
+            
+            let response1 = try await client.executeRequest(
+                uri: "/increase",
+                method: .post,
+                headers: [:],
+                body: nil
+            )
+            
+            buffer = response1.body
+            let renderedCount1 = buffer.readString(length: buffer.readableBytes)
+            XCTAssertEqual(renderedCount1, "<span>1</span>")
+            
         }
     }
 }
