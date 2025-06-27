@@ -3,7 +3,7 @@
 import XCTest
 import HummingBirdCounterApp
 
-class CounterControllerTests: XCTestCase {
+class CounterControllerSadPathTests: XCTestCase {
     class CounterStoreSpy: CounterStore {
         var capturedMessages = [Message]()
         

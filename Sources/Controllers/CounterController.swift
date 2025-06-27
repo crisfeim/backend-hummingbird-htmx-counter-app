@@ -7,8 +7,9 @@ public struct CounterController {
         self.store = store
     }
     
-    public func get() async throws -> Int {
-        try await store.load()
+    public func get() async throws -> String {
+        let count = try await store.load()
+        return CounterView(count: count).render()
     }
     
     public func postIncrease() async throws -> Int {
