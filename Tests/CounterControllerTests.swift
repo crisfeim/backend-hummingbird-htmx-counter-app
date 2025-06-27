@@ -1,10 +1,9 @@
 // © 2025  Cristian Felipe Patiño Rojas. Created on 27/6/25.
+
 import XCTest
+import HummingBirdCounterApp
 
 class CounterControllerTests: XCTestCase {
-    
-    
-    
     class CounterStoreSpy: CounterStore {
         var capturedMessages = [Message]()
         
@@ -25,8 +24,6 @@ class CounterControllerTests: XCTestCase {
             fatalError("dont needed yet")
         }
     }
-    
-    
     
     func test_init_doesntMessageStore() {
         let storeSpy = CounterStoreSpy()
