@@ -5,6 +5,7 @@ class CounterControllerTests: XCTestCase {
     
     protocol CounterStore {
         func load() async throws -> Int
+        func increase() async throws -> Int
     }
     
     class CounterStoreSpy: CounterStore {
@@ -18,12 +19,20 @@ class CounterControllerTests: XCTestCase {
             capturedMessages.append(.load)
             return 0
         }
+        
+        func increase() async throws -> Int {
+            fatalError("dont needed yet")
+        }
     }
     struct CounterController {
         let store: CounterStore
         
         func get() async throws -> Int {
             try await store.load()
+        }
+        
+        func postIncrease() async throws -> Int {
+            try await store.increase()
         }
     }
     
@@ -40,6 +49,10 @@ class CounterControllerTests: XCTestCase {
             func load() async throws -> Int {
                 throw error
             }
+            
+            func increase() async throws -> Int {
+                fatalError("shouldn't be invoked in this test")
+            }
         }
         let storeStub = CounterStoreStub(error: anyError())
         let sut = CounterController(store: storeStub)
@@ -47,6 +60,27 @@ class CounterControllerTests: XCTestCase {
         await XCTAssertThrowsErrorAsync(try await sut.get()) { error in
             XCTAssertEqual(error as NSError, anyError())
         }
+    }
+    
+    func test_postIncrease_deliversErrorOnStoreError() async throws {
+        struct CounterStoreStub: CounterStore {
+            let error: NSError
+            func load() async throws -> Int {
+                fatalError("should not be called")
+            }
+            
+            func increase() async throws -> Int {
+                throw error
+            }
+        }
+        
+        let storeStub = CounterStoreStub(error: anyError())
+        let sut = CounterController(store: storeStub)
+        
+        await XCTAssertThrowsErrorAsync(try await sut.postIncrease()) { error in
+            XCTAssertEqual(error as NSError, anyError())
+        }
+        
     }
     
     func anyError() -> NSError {
