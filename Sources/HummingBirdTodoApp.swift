@@ -7,7 +7,7 @@
 import ArgumentParser
 
 @main
-struct HummingBirdTodoApp: ParsableCommand {
+struct HummingBirdCounterApp: ParsableCommand {
     mutating func run() throws {
         print("Hello, world!")
     }
