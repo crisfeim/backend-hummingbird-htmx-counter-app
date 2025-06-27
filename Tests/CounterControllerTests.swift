@@ -3,11 +3,7 @@ import XCTest
 
 class CounterControllerTests: XCTestCase {
     
-    protocol CounterStore {
-        func load() async throws -> Int
-        func increase() async throws -> Int
-        func decrease() async throws -> Int
-    }
+    
     
     class CounterStoreSpy: CounterStore {
         var capturedMessages = [Message]()
@@ -29,21 +25,7 @@ class CounterControllerTests: XCTestCase {
             fatalError("dont needed yet")
         }
     }
-    struct CounterController {
-        let store: CounterStore
-        
-        func get() async throws -> Int {
-            try await store.load()
-        }
-        
-        func postIncrease() async throws -> Int {
-            try await store.increase()
-        }
-        
-        func postDecrease() async throws -> Int {
-            try await store.decrease()
-        }
-    }
+    
     
     
     func test_init_doesntMessageStore() {
